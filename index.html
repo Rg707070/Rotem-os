@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rotem OS | The Master Suite</title>
+    
+    <!-- External Resources -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&family=Heebo:wght@300;500;800&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: '#0f172a',
+                        gold: '#c69c6d',
+                        goldLight: '#e5c5a3',
+                        slate850: '#151c2c'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Segoe UI', 'Heebo', sans-serif; background-color: #05080a; color: #e2e8f0; height: 100vh; overflow: hidden; }
+        .serif { font-family: 'Frank Ruhl Libre', serif; }
+        
+        /* Glassmorphism Effects */
+        .glass { background: rgba(30, 41, 59, 0.4); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .sidebar-active { background: rgba(198, 156, 109, 0.15); border-right: 4px solid #c69c6d; color: #c69c6d; opacity: 1 !important; }
+        
+        /* Tab Transitions */
+        .tab-content { display: none; animation: fadeIn 0.4s ease-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Habit Chain Grid */
+        .chain-cell { width: 12px; height: 12px; border-radius: 2px; background: #1e293b; transition: all 0.2s; cursor: pointer; }
+        .chain-cell.active { background: #c69c6d; box-shadow: 0 0 8px #c69c6d; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- Auth Layer -->
+    <div id="auth-overlay" class="fixed inset-0 z-[100] bg-navy flex items-center justify-center transition-opacity duration-500">
+        <div class="glass p-10 w-96 rounded-2xl text-center border-gold/20">
+            <i data-lucide="shield-check" class="mx-auto text-gold mb-4" size="48"></i>
+            <h2 class="text-2xl font-bold text-white mb-6 serif">Rotem OS Access</h2>
+            <input type="password" id="login-pass" placeholder="Password" class="w-full bg-slate-800 border-none rounded-lg p-3 text-center text-white mb-4 outline-none focus:ring-2 ring-gold/50">
+            <button onclick="checkAuth()" class="w-full bg-gold text-navy font-bold py-3 rounded-lg hover:bg-goldLight transition">התחבר למערכת</button>
+        </div>
+    </div>
+
+    <!-- Sidebar (M365 Style) -->
+    <aside class="w-20 lg:w-64 bg-slate-950 border-l border-white/5 flex flex-col z-50">
+        <div class="p-6 mb-4 flex items-center gap-3">
+            <div class="w-8 h-8 bg-gold rounded flex items-center justify-center text-navy font-black">R</div>
+            <span class="hidden lg:block font-bold text-lg tracking-tight serif">ROTEM <span class="text-gold">OS</span></span>
+        </div>
+        
+        <nav class="flex-1 px-3 space-y-2">
+            <div onclick="showTab('dash')" id="btn-dash" class="sidebar-active flex items-center p-3 rounded-lg gap-4 opacity-60 hover:opacity-100 cursor-pointer transition">
+                <i data-lucide="layout-grid"></i><span class="hidden lg:block font-medium">דאשבורד זהות</span>
+            </div>
+            <div onclick="showTab('habits')" id="btn-habits" class="flex items-center p-3 rounded-lg gap-4 opacity-60 hover:opacity-100 cursor-pointer transition">
+                <i data-lucide="zap"></i><span class="hidden lg:block font-medium">Atomic Habits</span>
+            </div>
+            <div onclick="showTab('trading')" id="btn-trading" class="flex items-center p-3 rounded-lg gap-4 opacity-60 hover:opacity-100 cursor-pointer transition">
+                <i data-lucide="line-chart"></i><span class="hidden lg:block font-medium">Swing Trading</span>
+            </div>
+            <div onclick="showTab('notes')" id="btn-notes" class="flex items-center p-3 rounded-lg gap-4 opacity-60 hover:opacity-100 cursor-pointer transition">
+                <i data-lucide="book-open"></i><span class="hidden lg:block font-medium">מחברת OneNote</span>
+            </div>
+        </nav>
+
+        <div class="p-4 border-t border-white/5">
+            <div onclick="showTab('settings')" class="flex items-center p-3 rounded-lg gap-4 opacity-40 hover:opacity-100 cursor-pointer transition text-xs">
+                <i data-lucide="settings" size="18"></i><span class="hidden lg:block">הגדרות וגיבוי</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main View Area -->
+    <main class="flex-1 flex flex-col relative overflow-hidden bg-[#05080a]">
+        
+        <!-- Top Bar -->
+        <header class="h-16 border-b border-white/5 flex items-center justify-between px-8 glass">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-2 text-gold">
+                    <i data-lucide="calendar" size="18"></i>
+                    <span id="heb-date" class="text-sm font-medium">טוען תאריך עברי...</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="text-left">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest">100 Days of Growth</p>
+                    <p class="text-sm font-bold text-white">יום <span id="project-day" class="text-gold">1</span> / 100</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- View Content Wrapper -->
+        <div class="flex-1 overflow-y-auto p-8">
+            
+            <!-- TAB 1: Identity Dashboard -->
+            <section id="tab-dash" class="tab-content active">
+                <div class="mb-10">
+                    <h2 class="text-4xl font-bold text-white mb-2 serif tracking-tight">הזהות החדשה שלי</h2>
+                    <p class="text-slate-400">"הרגלים הם לא רק לעשות משהו, הם להפוך למישהו." — ג'יימס קליר</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    <div class="glass p-6 rounded-xl border-r-4 border-gold">
+                        <i data-lucide="trending-up" class="text-gold mb-4"></i>
+                        <h3 class="text-xl font-bold text-white">סוחר מניות מקצועי</h3>
+                        <p class="text-sm text-slate-500 mt-2">אני פועל לפי תוכנית, שומר על R/R גבוה ומנהל סיכונים בקור רוח.</p>
+                    </div>
+                    <div class="glass p-6 rounded-xl border-r-4 border-blue-400">
+                        <i data-lucide="languages" class="text-blue-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-white">דובר ספרדית</h3>
+                        <p class="text-sm text-slate-500 mt-2">אני לומד בכל יום מילים חדשות ומתקשר בביטחון בשפה נוספת.</p>
+                    </div>
+                    <div class="glass p-6 rounded-xl border-r-4 border-green-500">
+                        <i data-lucide="run" class="text-green-500 mb-4"></i>
+                        <h3 class="text-xl font-bold text-white">רץ חצי מרתון</h3>
+                        <p class="text-sm text-slate-500 mt-2">אני ספורטאי שמחזק את הגוף והנפש בכל אימון לקראת ה-21 ק"מ.</p>
+                    </div>
+                </div>
+
+                <!-- 100 Day Chain -->
+                <div class="glass p-8 rounded-2xl relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-gold to-transparent opacity-30"></div>
+                    <h3 class="text-lg font-bold mb-6 flex items-center gap-2">
+                        <i data-lucide="link" size="18" class="text-gold"></i>
+                        אל תשבור את השרשרת (100 ימי צמיחה)
+                    </h3>
+                    <div id="chain-grid" class="flex flex-wrap gap-2 max-w-4xl">
+                        <!-- JS Generated Cells -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: Atomic Habits -->
+            <section id="tab-habits" class="tab-content">
+                <div class="max-w-4xl mx-auto space-y-8">
+                    <div class="flex justify-between items-end mb-8">
+                        <div>
+                            <h2 class="text-3xl font-bold serif text-white">מערכת הרגלים</h2>
+                            <p class="text-slate-400">הפוך את זה לבולט, מושך, קל ומספק.</p>
+                        </div>
+                    </div>
+
+                    <!-- Habit Stacking -->
+                    <div class="bg-slate-900/50 p-6 rounded-xl border border-dashed border-slate-700">
+                        <p class="text-gold text-xs font-bold uppercase mb-4 tracking-tighter">Habit Stacking Builder</p>
+                        <div class="flex flex-wrap items-center gap-3 text-xl">
+                            <span>אחרי שאני</span>
+                            <input type="text" placeholder="[הרגל קיים]" class="bg-transparent border-b border-slate-700 outline-none text-gold w-48">
+                            <span>אני מיד אבצע</span>
+                            <input type="text" placeholder="[הרגל חדש]" class="bg-transparent border-b border-slate-700 outline-none text-gold w-48">
+                        </div>
+                    </div>
+
+                    <div id="habits-list" class="grid gap-4">
+                        <!-- Dynamic Habit Cards -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: Swing Trading Hub -->
+            <section id="tab-trading" class="tab-content">
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[750px]">
+                    <!-- Chart -->
+                    <div class="lg:col-span-3 glass rounded-xl overflow-hidden relative">
+                        <div id="tv_widget_container" class="w-full h-full"></div>
+                    </div>
+                    
+                    <!-- Sidebar Tools -->
+                    <div class="space-y-6">
+                        <div class="glass p-6 rounded-xl border-gold/20">
+                            <h3 class="font-bold text-gold mb-6 flex items-center gap-2"><i data-lucide="calculator"></i> מחשבון R/R פרו</h3>
+                            <div class="space-y-4">
+                                <div class="group">
+                                    <label class="text-[10px] text-slate-500 uppercase font-bold">מחיר כניסה</label>
+                                    <input type="number" id="trade-entry" class="w-full bg-slate-850 border-none rounded p-3 mt-1 focus:ring-1 ring-gold">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-[10px] text-slate-500 uppercase font-bold">Stop Loss</label>
+                                        <input type="number" id="trade-sl" class="w-full bg-slate-850 border-none rounded p-3 mt-1 text-red-400">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] text-slate-500 uppercase font-bold">Take Profit</label>
+                                        <input type="number" id="trade-tp" class="w-full bg-slate-850 border-none rounded p-3 mt-1 text-green-400">
+                                    </div>
+                                </div>
+                                <div class="pt-6 border-t border-white/5">
+                                    <div class="flex justify-between items-baseline">
+                                        <span class="text-sm font-medium">יחס סיכון לסיכוי:</span>
+                                        <span id="rr-display" class="text-3xl font-black text-gold">1:0.00</span>
+                                    </div>
+                                    <p id="rr-verdict" class="text-[10px] text-center mt-4 uppercase font-bold text-slate-500 tracking-widest"></p>
+                                </div>
+                                <button onclick="saveTrade()" class="w-full bg-white/5 hover:bg-white/10 text-white font-bold py-3 rounded-lg transition border border-white/10 mt-4">שמור עסקה ליומן</button>
+                            </div>
+                        </div>
+
+                        <!-- Mini Trade Log -->
+                        <div class="glass p-4 rounded-xl flex-1 overflow-y-auto">
+                            <h4 class="text-xs font-bold text-slate-500 mb-4 uppercase">עסקאות אחרונות</h4>
+                            <div id="recent-trades" class="space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: OneNote Notebook -->
+            <section id="tab-notes" class="tab-content h-full">
+                <div class="glass rounded-2xl h-[calc(100vh-14rem)] flex flex-col overflow-hidden">
+                    <div class="bg-white/5 p-3 border-b border-white/5 flex items-center justify-between">
+                        <div class="flex gap-4">
+                            <button onclick="execCmd('bold')" class="p-2 hover:bg-white/5 rounded text-slate-400"><i data-lucide="bold" size="18"></i></button>
+                            <button onclick="execCmd('insertUnorderedList')" class="p-2 hover:bg-white/5 rounded text-slate-400"><i data-lucide="list" size="18"></i></button>
+                            <button onclick="execCmd('formatBlock', 'h2')" class="p-2 hover:bg-white/5 rounded text-slate-400"><i data-lucide="heading" size="18"></i></button>
+                        </div>
+                        <div id="note-status" class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">נשמר אוטומטית</div>
+                    </div>
+                    <div id="editor" contenteditable="true" class="flex-1 p-10 outline-none overflow-y-auto text-xl leading-relaxed font-light" placeholder="התחל לכתוב... סיכומי גמרא, חוקי מסחר, תובנות צמיחה."></div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Global Scripts -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script>
+        // Init Lucide Icons
+        lucide.createIcons();
+
+        // --- Data Engine ---
+        let storage = JSON.parse(localStorage.getItem('rotem_ultimate_os')) || {
+            habits: [
+                { id: 1, name: "סריקת מניות שבועית", identity: "סוחר", streak: 0, done: false, rule: "לפתוח גרף אחד בלבד" },
+                { id: 2, name: "לימוד ספרדית", identity: "דובר שפה", streak: 0, done: false, rule: "ללמוד מילה אחת חדשה" },
+                { id: 3, name: "אימון ריצה", identity: "רץ", streak: 0, done: false, rule: "לנעול נעלי ריצה" }
+            ],
+            trades: [],
+            notes: "",
+            grid: Array(100).fill(false),
+            config: { startDate: "2026-04-30", pass: "123" }
+        };
+
+        function saveDB() { localStorage.setItem('rotem_ultimate_os', JSON.stringify(storage)); }
+
+        // --- Auth System ---
+        function checkAuth() {
+            if (document.getElementById('login-pass').value === storage.config.pass) {
+                document.getElementById('auth-overlay').classList.add('opacity-0', 'pointer-events-none');
+                initApp();
+            }
+        }
+
+        // --- Navigation ---
+        function showTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('nav div').forEach(b => b.classList.remove('sidebar-active'));
+            
+            document.getElementById('tab-' + id).classList.add('active');
+            document.getElementById('btn-' + id).classList.add('sidebar-active');
+            
+            if (id === 'trading') initTV();
+        }
+
+        // --- Atomic Habits Logic ---
+        function renderHabits() {
+            const list = document.getElementById('habits-list');
+            list.innerHTML = storage.habits.map(h => `
+                <div class="glass p-5 rounded-xl flex items-center justify-between border-r-2 ${h.done ? 'border-gold opacity-60' : 'border-slate-700'}">
+                    <div class="flex items-center gap-4">
+                        <input type="checkbox" ${h.done ? 'checked' : ''} onchange="toggleHabit(${h.id})" class="w-6 h-6 accent-gold cursor-pointer">
+                        <div>
+                            <p class="font-bold text-white text-lg">${h.name}</p>
+                            <p class="text-xs text-slate-500">חוק 2 הדקות: ${h.rule}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 bg-gold/10 text-gold px-3 py-1 rounded-full text-xs font-bold">
+                        <i data-lucide="flame" size="14"></i> ${h.streak} ימים
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        function toggleHabit(id) {
+            const habit = storage.habits.find(h => h.id === id);
+            habit.done = !habit.done;
+            habit.streak += habit.done ? 1 : -1;
+            saveDB(); renderHabits();
+        }
+
+        // --- Trading View & Math ---
+        function initTV() {
+            new TradingView.widget({
+                "container_id": "tv_widget_container",
+                "autosize": true,
+                "symbol": "NASDAQ:AAPL",
+                "interval": "W",
+                "theme": "dark",
+                "style": "1",
+                "locale": "he_IL",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "allow_symbol_change": true,
+            });
+        }
+
+        const inputs = ['trade-entry', 'trade-sl', 'trade-tp'];
+        inputs.forEach(id => document.getElementById(id).addEventListener('input', () => {
+            const e = parseFloat(document.getElementById('trade-entry').value);
+            const s = parseFloat(document.getElementById('trade-sl').value);
+            const t = parseFloat(document.getElementById('trade-tp').value);
+            if (e && s && t) {
+                const rr = (Math.abs(t - e) / Math.abs(e - s)).toFixed(2);
+                document.getElementById('rr-display').innerText = `1:${rr}`;
+                const verdict = document.getElementById('rr-verdict');
+                verdict.innerText = rr >= 2 ? "עסקה איכותית - R/R מעולה" : "זהירות: יחס סיכון נמוך";
+                verdict.className = rr >= 2 ? "text-[10px] text-center mt-4 uppercase font-bold text-green-500 tracking-widest" : "text-[10px] text-center mt-4 uppercase font-bold text-red-500 tracking-widest";
+            }
+        }));
+
+        function saveTrade() {
+            const sym = "TRADE"; // במציאות אפשר להוסיף שדה סימול
+            const rr = document.getElementById('rr-display').innerText;
+            storage.trades.push({ sym, rr, date: new Date().toLocaleDateString() });
+            saveDB(); renderRecentTrades();
+        }
+
+        function renderRecentTrades() {
+            const container = document.getElementById('recent-trades');
+            container.innerHTML = storage.trades.slice(-4).reverse().map(t => `
+                <div class="flex justify-between items-center text-xs p-2 bg-white/5 rounded">
+                    <span class="font-bold">${t.date}</span>
+                    <span class="text-gold font-black">${t.rr}</span>
+                </div>
+            `).join('');
+        }
+
+        // --- 100 Day Chain Logic ---
+        function renderChain() {
+            const grid = document.getElementById('chain-grid');
+            grid.innerHTML = storage.grid.map((done, i) => `
+                <div onclick="toggleChain(${i})" class="chain-cell ${done ? 'active' : ''}" title="יום ${i+1}"></div>
+            `).join('');
+        }
+        function toggleChain(i) { storage.grid[i] = !storage.grid[i]; saveDB(); renderChain(); }
+
+        // --- Notebook & Auto-save ---
+        function execCmd(cmd, val = null) { document.execCommand(cmd, false, val); }
+        const editor = document.getElementById('editor');
+        editor.innerHTML = storage.notes;
+        editor.addEventListener('input', () => {
+            storage.notes = editor.innerHTML;
+            saveDB();
+            document.getElementById('note-status').innerText = "נשמר כרגע";
+            setTimeout(() => document.getElementById('note-status').innerText = "נשמר אוטומטית", 2000);
+        });
+
+        // --- Initialization ---
+        function initApp() {
+            renderHabits();
+            renderChain();
+            renderRecentTrades();
+            
+            // Hebrew Date
+            fetch('https://www.hebcal.com/converter?cfg=json&date=now&g2h=1&he=1')
+                .then(r => r.json()).then(d => document.getElementById('heb-date').innerText = d.hebrew);
+            
+            // Project Day Counter
+            const start = new Date(storage.config.startDate);
+            const diff = Math.ceil((new Date() - start) / (1000 * 60 * 60 * 24));
+            document.getElementById('project-day').innerText = diff > 0 ? diff : 1;
+        }
+    </script>
+</body>
+</html>

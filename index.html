@@ -3,235 +3,350 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rotem OS | The Master Suite</title>
+    <title>Rotem OS | Growth System</title>
     
+    <!-- Frameworks -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Heebo:wght@300;500;800&family=Frank+Ruhl+Libre:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Heebo:wght@300;500;800&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Segoe UI', 'Heebo', sans-serif; background-color: #010409; color: #f0f6fc; height: 100vh; overflow: hidden; }
-        .serif { font-family: 'Frank Ruhl Libre', serif; }
-        .glass { background: rgba(13, 17, 23, 0.7); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.05); }
-        
-        /* Calendar UI */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
-        .day-cell { aspect-ratio: 1.2; @apply flex flex-col items-center justify-center rounded-xl border border-white/5 transition-all cursor-pointer; background: rgba(255, 255, 255, 0.02); }
-        .day-cell:hover { background: rgba(198, 156, 109, 0.15); transform: translateY(-2px); }
-        .day-cell.today { border: 2px solid #c69c6d; box-shadow: 0 0 20px rgba(198, 156, 109, 0.2); }
-        .day-cell.active { background: linear-gradient(135deg, #c69c6d 0%, #8e6d45 100%); color: #010409; border: none; font-weight: 800; }
+        :root {
+            --m365-bg: #010409;
+            --m365-card: rgba(13, 17, 23, 0.7);
+            --gold-accent: #c69c6d;
+            --fluent-border: rgba(255, 255, 255, 0.08);
+        }
 
-        /* Sidebar & Navigation */
-        .nav-item { @apply flex items-center gap-4 px-4 py-3 rounded-xl opacity-50 hover:opacity-100 hover:bg-white/5 transition-all cursor-pointer; }
-        .nav-item.active { @apply opacity-100 bg-gold/10 text-[#c69c6d] border-r-4 border-[#c69c6d]; }
-        
-        .view-section { display: none; }
-        .view-section.active { display: block; animation: fadeIn 0.4s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        body {
+            font-family: 'Segoe UI', 'Heebo', sans-serif;
+            background-color: var(--m365-bg);
+            color: #f0f6fc;
+            height: 100vh;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Microsoft 365 Mica Effect */
+        .mica {
+            background: var(--m365-card);
+            backdrop-filter: blur(30px) saturate(150%);
+            border: 1px solid var(--fluent-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        .nav-item {
+            @apply flex items-center gap-4 px-4 py-3 rounded-xl opacity-60 hover:opacity-100 hover:bg-white/5 transition-all cursor-pointer;
+        }
+
+        .nav-item.active {
+            @apply opacity-100 bg-[#c69c6d]/10 text-[#c69c6d];
+            border-inline-start: 3px solid var(--gold-accent);
+        }
+
+        .view-section { display: none; height: 100%; }
+        .view-section.active { display: block; animation: fluentFade 0.5s ease; }
+
+        @keyframes fluentFade {
+            from { opacity: 0; transform: scale(0.98) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--fluent-border); border-radius: 10px; }
+
+        input, textarea {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--fluent-border);
+            outline: none;
+            transition: border 0.3s;
+        }
+        input:focus { border-color: var(--gold-accent); }
     </style>
 </head>
 <body class="flex">
 
-    <!-- Sidebar (M365 Style) -->
-    <aside class="w-64 glass flex flex-col p-6 z-50 border-l border-white/5">
-        <div class="mb-10 flex items-center gap-3">
-            <div class="w-10 h-10 bg-[#c69c6d] rounded-lg flex items-center justify-center text-black font-black text-xl shadow-lg shadow-gold/20">R</div>
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-72 mica flex flex-col p-6 z-50">
+        <div class="mb-10 flex items-center gap-4">
+            <div class="w-12 h-12 bg-[#c69c6d] rounded-xl flex items-center justify-center text-black font-black text-2xl shadow-lg shadow-gold-500/20">R</div>
             <div>
-                <h1 class="font-bold text-lg leading-tight">ROTEM <span class="text-[#c69c6d]">OS</span></h1>
-                <p class="text-[9px] opacity-40 uppercase tracking-[0.2em]">Growth System</p>
+                <h1 class="font-bold text-xl leading-tight tracking-tight">Rotem <span class="text-[#c69c6d]">OS</span></h1>
+                <p class="text-[10px] opacity-40 uppercase tracking-[0.2em]" data-i18n="system-subtitle">Growth System</p>
             </div>
         </div>
 
-        <nav class="space-y-1 flex-1">
-            <div onclick="switchView('dash')" id="nav-dash" class="nav-item active"><i data-lucide="layout-grid"></i><span>דאשבורד זהות</span></div>
-            <div onclick="switchView('trading')" id="nav-trading" class="nav-item"><i data-lucide="bar-chart-3"></i><span>Swing Trading</span></div>
-            <div onclick="switchView('notes')" id="nav-notes" class="nav-item"><i data-lucide="pen-tool"></i><span>OneNote</span></div>
+        <nav class="space-y-2 flex-1">
+            <div onclick="switchView('dash')" id="nav-dash" class="nav-item active"><i data-lucide="layout-grid"></i><span data-i18n="nav-dash">דאשבורד זהות</span></div>
+            <div onclick="switchView('trading')" id="nav-trading" class="nav-item"><i data-lucide="line-chart"></i><span data-i18n="nav-trading">Swing Trading</span></div>
+            <div onclick="switchView('notes')" id="nav-notes" class="nav-item"><i data-lucide="notebook"></i><span data-i18n="nav-notes">OneNote</span></div>
         </nav>
+
+        <div class="mt-auto pt-6 border-t border-white/5">
+            <div class="flex items-center gap-3 px-2">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#c69c6d] to-yellow-200"></div>
+                <div class="text-xs">
+                    <p class="font-bold">Rotem G.</p>
+                    <p class="opacity-40">Pro Member</p>
+                </div>
+            </div>
+        </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="flex-1 flex flex-col relative">
-        <!-- Top Header -->
-        <header class="h-20 flex items-center justify-between px-10 border-b border-white/5 bg-black/20">
+    <main class="flex-1 flex flex-col relative overflow-hidden">
+        
+        <!-- Microsoft 365 Header -->
+        <header class="h-20 flex items-center justify-between px-10 border-b border-white/5 bg-black/10">
             <div class="flex flex-col">
-                <span class="text-[10px] opacity-40 font-bold uppercase tracking-widest">Project Progress</span>
-                <h2 class="text-xl font-bold">יום <span id="current-day" class="text-[#c69c6d]">2</span> <span class="text-sm opacity-30">/ 100</span></h2>
+                <span class="text-[10px] opacity-40 font-bold uppercase tracking-widest" data-i18n="header-label">Project Roadmap</span>
+                <h2 class="text-2xl font-bold italic"><span data-i18n="day-prefix">יום</span> <span id="current-day" class="text-[#c69c6d]">--</span> <span class="text-sm opacity-20">/ 100</span></h2>
             </div>
-            <div class="flex items-center gap-4 glass px-4 py-2 rounded-full border-gold/20">
-                <i data-lucide="award" class="text-[#c69c6d]" size="18"></i>
-                <span class="text-xs font-bold">100 Days of Growth</span>
+            
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-3 mica px-4 py-2 rounded-lg">
+                    <i data-lucide="flame" class="text-orange-500" size="18"></i>
+                    <span class="text-xs font-bold uppercase tracking-tighter" data-i18n="badge-text">100 Days of Growth</span>
+                </div>
             </div>
         </header>
 
-        <!-- Dynamic Content -->
         <div class="flex-1 overflow-y-auto p-10 pb-32">
             
-            <!-- VIEW: Identity Dashboard -->
+            <!-- View: Dashboard -->
             <section id="view-dash" class="view-section active">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-                    <div class="glass p-6 rounded-2xl border-r-4 border-green-500 hover:scale-[1.02] transition-transform">
-                        <div class="flex justify-between items-start mb-4"><i data-lucide="zap" class="text-green-500"></i><span class="text-[10px] opacity-40">Identity 01</span></div>
-                        <h3 class="text-xl font-bold mb-1">רץ חצי מרתון</h3>
-                        <p class="text-xs opacity-50 leading-relaxed">אני ספורטאי שמחזק את הגוף והנפש בכל אימון לקראת ה-21 ק"מ.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                    <div class="mica p-6 rounded-2xl border-r-4 border-green-500/50">
+                        <i data-lucide="timer" class="text-green-500 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-1" data-i18n="card1-title">רץ חצי מרתון</h3>
+                        <p class="text-xs opacity-50 leading-relaxed" data-i18n="card1-desc">21 ק"מ של משמעת עצמית וסיבולת לב ריאה.</p>
                     </div>
-                    <div class="glass p-6 rounded-2xl border-r-4 border-blue-400 hover:scale-[1.02] transition-transform">
-                        <div class="flex justify-between items-start mb-4"><i data-lucide="languages" class="text-blue-400"></i><span class="text-[10px] opacity-40">Identity 02</span></div>
-                        <h3 class="text-xl font-bold mb-1">דובר ספרדית</h3>
-                        <p class="text-xs opacity-50 leading-relaxed">אני לומד בכל יום מילים חדשות ומתקשר בביטחון בשפה נוספת.</p>
+                    <div class="mica p-6 rounded-2xl border-r-4 border-blue-400/50">
+                        <i data-lucide="globe" class="text-blue-400 mb-4"></i>
+                        <h3 class="text-xl font-bold mb-1" data-i18n="card2-title">דובר ספרדית</h3>
+                        <p class="text-xs opacity-50 leading-relaxed" data-i18n="card2-desc">למידה יומית, אוצר מילים ודיבור שוטף.</p>
                     </div>
-                    <div class="glass p-6 rounded-2xl border-r-4 border-[#c69c6d] hover:scale-[1.02] transition-transform">
-                        <div class="flex justify-between items-start mb-4"><i data-lucide="trending-up" class="text-[#c69c6d]"></i><span class="text-[10px] opacity-40">Identity 03</span></div>
-                        <h3 class="text-xl font-bold mb-1">סוחר מניות מקצועי</h3>
-                        <p class="text-xs opacity-50 leading-relaxed">אני פועל לפי תוכנית, שומר על R/R גבוה ומנהל סיכונים בקור רוח.</p>
+                    <div class="mica p-6 rounded-2xl border-r-4 border-[#c69c6d]/50">
+                        <i data-lucide="trending-up" class="text-[#c69c6d] mb-4"></i>
+                        <h3 class="text-xl font-bold mb-1" data-i18n="card3-title">סוחר מניות</h3>
+                        <p class="text-xs opacity-50 leading-relaxed" data-i18n="card3-desc">מסחר סווינג, ניהול סיכונים ו-R/R קפדני.</p>
                     </div>
                 </div>
 
-                <div class="glass p-8 rounded-3xl">
-                    <div class="flex justify-between items-end mb-8">
-                        <h3 class="text-2xl font-bold serif flex items-center gap-3">
-                            <i data-lucide="link" class="text-[#c69c6d]"></i> אל תשבור את השרשרת
-                        </h3>
-                        <span id="month-display" class="text-sm font-bold opacity-40 uppercase tracking-widest">מאי 2026</span>
+                <div class="mica p-8 rounded-3xl">
+                    <div class="flex items-center justify-between mb-8">
+                        <h3 class="text-2xl font-bold flex items-center gap-3"><i data-lucide="calendar" class="text-[#c69c6d]"></i> <span data-i18n="calendar-title">אל תשבור את השרשרת</span></h3>
+                        <span class="text-[10px] opacity-30 uppercase tracking-widest">May 2026</span>
                     </div>
-                    <div id="calendar-container" class="calendar-grid">
-                        <!-- JS Dynamic Grid -->
-                    </div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-3"></div>
                 </div>
             </section>
 
-            <!-- VIEW: Swing Trading -->
+            <!-- View: Trading -->
             <section id="view-trading" class="view-section">
-                <div class="grid grid-cols-4 gap-6 h-[550px]">
-                    <div id="tradingview_widget" class="col-span-3 glass rounded-3xl overflow-hidden p-2"></div>
-                    <div class="glass p-6 rounded-3xl flex flex-col">
-                        <h4 class="text-lg font-bold mb-6 text-[#c69c6d] serif underline decoration-gold/30">מחשבון R/R</h4>
-                        <div class="space-y-5 flex-1">
-                            <div><label class="text-[10px] opacity-40 uppercase font-black">Entry Price</label><input type="number" id="entry" class="w-full bg-white/5 p-3 rounded-xl mt-1 outline-none border border-white/5 focus:border-gold/50"></div>
-                            <div><label class="text-[10px] opacity-40 uppercase font-black">Stop Loss</label><input type="number" id="stop" class="w-full bg-white/5 p-3 rounded-xl mt-1 text-red-400 outline-none border border-white/5"></div>
-                            <div><label class="text-[10px] opacity-40 uppercase font-black">Take Profit</label><input type="number" id="target" class="w-full bg-white/5 p-3 rounded-xl mt-1 text-green-400 outline-none border border-white/5"></div>
-                        </div>
-                        <div class="pt-6 border-t border-white/5 text-center">
-                            <p class="text-xs opacity-30 mb-1">Ratio Result</p>
-                            <p id="rr-display" class="text-4xl font-black text-[#c69c6d]">1:0.00</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+                    <div class="lg:col-span-2 mica rounded-2xl overflow-hidden min-h-[500px]">
+                        <div id="tradingview_widget" class="h-full"></div>
+                    </div>
+                    <div class="mica p-6 rounded-2xl flex flex-col">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2"><i data-lucide="calculator"></i> Risk/Reward</h3>
+                        <div class="space-y-4 flex-1">
+                            <div>
+                                <label class="text-[10px] opacity-40 block mb-1 uppercase">Entry Price</label>
+                                <input type="number" id="entry" oninput="calcRR()" class="w-full p-3 rounded-lg text-white font-bold" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="text-[10px] opacity-40 block mb-1 uppercase">Stop Loss</label>
+                                <input type="number" id="stop" oninput="calcRR()" class="w-full p-3 rounded-lg text-white font-bold" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="text-[10px] opacity-40 block mb-1 uppercase">Target</label>
+                                <input type="number" id="target" oninput="calcRR()" class="w-full p-3 rounded-lg text-white font-bold" placeholder="0.00">
+                            </div>
+                            <div class="pt-6 mt-6 border-t border-white/5">
+                                <div class="flex justify-between items-end">
+                                    <span class="text-sm opacity-50" data-i18n="rr-ratio">Ratio R/R</span>
+                                    <span id="rr-result" class="text-4xl font-black text-[#c69c6d]">1:0.0</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- VIEW: OneNote -->
+            <!-- View: OneNote -->
             <section id="view-notes" class="view-section">
-                <div class="glass rounded-3xl h-[550px] flex flex-col">
-                    <div class="p-4 border-b border-white/5 flex gap-4">
-                        <div class="w-3 h-3 rounded-full bg-red-500/50"></div>
-                        <div class="w-3 h-3 rounded-full bg-yellow-500/50"></div>
-                        <div class="w-3 h-3 rounded-full bg-green-500/50"></div>
+                <div class="mica h-full rounded-2xl p-8 flex flex-col">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold flex items-center gap-2"><i data-lucide="edit-3"></i> Growth Journal</h3>
+                        <span id="save-status" class="text-[10px] opacity-30 italic">Saved</span>
                     </div>
-                    <div id="editor" contenteditable="true" class="flex-1 p-12 outline-none overflow-y-auto text-xl leading-relaxed font-light italic" placeholder="התחל לכתוב כאן..."></div>
+                    <textarea id="note-editor" oninput="saveNote()" class="flex-1 w-full bg-transparent border-none text-lg leading-loose resize-none focus:ring-0" placeholder="התחל לכתוב כאן..."></textarea>
                 </div>
             </section>
+
         </div>
 
-        <!-- FOOTER: Clock & Hebrew Date -->
-        <footer class="absolute bottom-6 left-10 flex items-center gap-6 glass px-6 py-3 rounded-2xl border-white/10 shadow-2xl">
-            <div class="flex flex-col border-l border-white/10 pl-6">
-                <span id="live-clock" class="text-2xl font-black tracking-tighter text-white">00:00:00</span>
-                <span class="text-[9px] opacity-40 font-bold uppercase">Real-time Clock</span>
+        <!-- Smart Status Bar -->
+        <footer class="absolute bottom-6 inset-x-10 flex items-center justify-between">
+            <div class="flex items-center gap-6 mica px-6 py-3 rounded-2xl">
+                <div class="flex flex-col border-inline-end border-white/10 pe-6">
+                    <span id="live-clock" class="text-2xl font-black tracking-tighter">00:00:00</span>
+                    <span class="text-[9px] opacity-40 font-bold uppercase tracking-widest">Live Clock</span>
+                </div>
+                <div class="flex flex-col">
+                    <span id="heb-date" class="text-sm font-bold text-[#c69c6d]">טוען תאריך...</span>
+                    <span id="greg-date" class="text-[9px] opacity-40 font-bold">1 May 2026</span>
+                </div>
             </div>
-            <div class="flex flex-col">
-                <span id="footer-heb-date" class="text-sm font-bold text-[#c69c6d]">טוען תאריך עברי...</span>
-                <span id="footer-greg-date" class="text-[9px] opacity-40 font-bold">1 במאי 2026</span>
-            </div>
+
+            <button onclick="toggleLang()" class="mica px-6 py-3 rounded-2xl flex items-center gap-3 hover:bg-white/10 transition-all">
+                <i data-lucide="languages" size="18" class="text-[#c69c6d]"></i>
+                <span id="lang-label" class="font-bold text-sm">English</span>
+            </button>
         </footer>
     </main>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        lucide.createIcons();
-        
-        // Persistence Engine
-        let state = JSON.parse(localStorage.getItem('rotem_ultimate_db')) || {
-            wins: [],
-            notes: "",
-            start: "2026-04-30"
+        const translations = {
+            he: {
+                "system-subtitle": "מערכת צמיחה",
+                "nav-dash": "דאשבורד זהות",
+                "nav-trading": "Swing Trading",
+                "nav-notes": "OneNote",
+                "header-label": "התקדמות הפרויקט",
+                "day-prefix": "יום",
+                "badge-text": "100 ימים של צמיחה",
+                "card1-title": "רץ חצי מרתון",
+                "card1-desc": "21 ק\"מ של משמעת עצמית וסיבולת לב ריאה.",
+                "card2-title": "דובר ספרדית",
+                "card2-desc": "למידה יומית, אוצר מילים ודיבור שוטף.",
+                "card3-title": "סוחר מניות",
+                "card3-desc": "מסחר סווינג, ניהול סיכונים ו-R/R קפדני.",
+                "calendar-title": "אל תשבור את השרשרת",
+                "rr-ratio": "יחס R/R",
+                "lang-next": "English"
+            },
+            en: {
+                "system-subtitle": "Growth System",
+                "nav-dash": "Identity Dashboard",
+                "nav-trading": "Swing Trading",
+                "nav-notes": "OneNote",
+                "header-label": "Project Roadmap",
+                "day-prefix": "Day",
+                "badge-text": "100 Days of Growth",
+                "card1-title": "Half-Marathon Runner",
+                "card1-desc": "21km of self-discipline and endurance.",
+                "card2-title": "Spanish Speaker",
+                "card2-desc": "Daily learning, vocabulary, and fluency.",
+                "card3-title": "Stock Trader",
+                "card3-desc": "Swing trading, risk management, and strict R/R.",
+                "calendar-title": "Don't Break the Chain",
+                "rr-ratio": "R/R Ratio",
+                "lang-next": "עברית"
+            }
         };
 
-        const save = () => localStorage.setItem('rotem_ultimate_db', JSON.stringify(state));
+        let state = JSON.parse(localStorage.getItem('rotem_os_v3')) || { 
+            lang: 'he', 
+            notes: '', 
+            wins: [],
+            start: "2026-04-30" 
+        };
 
-        // Navigation
-        function switchView(id) {
+        function switchView(viewId) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            document.getElementById('view-'+id).classList.add('active');
-            document.getElementById('nav-'+id).classList.add('active');
-            if(id === 'trading') new TradingView.widget({"container_id": "tradingview_widget", "autosize": true, "symbol": "NASDAQ:TSLA", "interval": "D", "theme": "dark", "locale": "he_IL"});
-        }
-
-        // Calendar Logic
-        function renderCalendar() {
-            const now = new Date();
-            const container = document.getElementById('calendar-container');
-            container.innerHTML = '';
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`view-${viewId}`).classList.add('active');
+            document.getElementById(`nav-${viewId}`).classList.add('active');
             
-            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).getDay();
-
-            // Padding
-            for(let i=0; i<firstDay; i++) container.innerHTML += '<div></div>';
-
-            for(let d=1; d<=daysInMonth; d++) {
-                const dateID = `${now.getFullYear()}-${now.getMonth()}-${d}`;
-                const cell = document.createElement('div');
-                cell.className = `day-cell ${d === now.getDate() ? 'today' : ''} ${state.wins.includes(dateID) ? 'active' : ''}`;
-                cell.innerHTML = `<span class="text-xs opacity-30 mb-1">${d}</span><i data-lucide="check" size="14"></i>`;
-                cell.onclick = () => {
-                    if(state.wins.includes(dateID)) state.wins = state.wins.filter(x => x !== dateID);
-                    else state.wins.push(dateID);
-                    save(); renderCalendar();
-                };
-                container.appendChild(cell);
-            }
-            lucide.createIcons();
+            if(viewId === 'trading') initTV();
         }
 
-        // Live Clock & Date
+        function initTV() {
+            new TradingView.widget({
+                "autosize": true,
+                "symbol": "NASDAQ:TSLA",
+                "interval": "D",
+                "timezone": "Etc/UTC",
+                "theme": "dark",
+                "style": "1",
+                "locale": "en",
+                "toolbar_bg": "#f1f3f6",
+                "enable_publishing": false,
+                "hide_side_toolbar": false,
+                "allow_symbol_change": true,
+                "container_id": "tradingview_widget"
+            });
+        }
+
+        function calcRR() {
+            const entry = parseFloat(document.getElementById('entry').value);
+            const stop = parseFloat(document.getElementById('stop').value);
+            const target = parseFloat(document.getElementById('target').value);
+            
+            if(entry && stop && target) {
+                const risk = Math.abs(entry - stop);
+                const reward = Math.abs(target - entry);
+                const ratio = (reward / risk).toFixed(1);
+                document.getElementById('rr-result').innerText = `1:${ratio}`;
+            }
+        }
+
+        function saveNote() {
+            state.notes = document.getElementById('note-editor').value;
+            localStorage.setItem('rotem_os_v3', JSON.stringify(state));
+            document.getElementById('save-status').innerText = 'Saving...';
+            setTimeout(() => document.getElementById('save-status').innerText = 'Saved', 800);
+        }
+
+        function toggleLang() {
+            state.lang = state.lang === 'he' ? 'en' : 'he';
+            updateUI();
+        }
+
+        function updateUI() {
+            const lang = state.lang;
+            document.documentElement.dir = lang === 'he' ? 'rtl' : 'ltr';
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                el.innerText = translations[lang][el.getAttribute('data-i18n')];
+            });
+            document.getElementById('lang-label').innerText = translations[lang]['lang-next'];
+            localStorage.setItem('rotem_os_v3', JSON.stringify(state));
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            const today = new Date().getDate();
+            for(let i=1; i<=31; i++) {
+                const day = document.createElement('div');
+                day.className = `h-16 mica rounded-xl flex items-center justify-center cursor-pointer transition-all hover:scale-105 ${i === today ? 'border-2 border-[#c69c6d] bg-[#c69c6d]/10' : 'opacity-40'}`;
+                day.innerHTML = `<span class="font-bold">${i}</span>`;
+                grid.appendChild(day);
+            }
+        }
+
         function updateClock() {
             const now = new Date();
             document.getElementById('live-clock').innerText = now.toLocaleTimeString('he-IL', { hour12: false });
             
-            // Calc Project Day
             const start = new Date(state.start);
             const diff = Math.ceil((now - start) / (1000 * 60 * 60 * 24));
-            document.getElementById('current-day').innerText = diff > 0 ? diff : 1;
+            document.getElementById('current-day').innerText = diff;
         }
 
-        // R/R Calculator
-        ['entry', 'stop', 'target'].forEach(id => document.getElementById(id).addEventListener('input', () => {
-            const e = parseFloat(document.getElementById('entry').value);
-            const s = parseFloat(document.getElementById('stop').value);
-            const t = parseFloat(document.getElementById('target').value);
-            if(e && s && t) {
-                const ratio = (Math.abs(t-e) / Math.abs(e-s)).toFixed(2);
-                document.getElementById('rr-display').innerText = `1:${ratio}`;
-            }
-        }));
-
-        // Initializing
+        // Initialize
+        document.getElementById('note-editor').value = state.notes;
         setInterval(updateClock, 1000);
-        updateClock();
-        renderCalendar();
+        updateUI();
+        lucide.createIcons();
         
-        // Hebrew Date
         fetch('https://www.hebcal.com/converter?cfg=json&date=now&g2h=1&he=1')
-            .then(r => r.json()).then(d => {
-                document.getElementById('footer-heb-date').innerText = d.hebrew;
-                document.getElementById('footer-greg-date').innerText = new Date().toLocaleDateString('he-IL', { day:'numeric', month:'long', year:'numeric'});
-            });
-
-        // Editor
-        const ed = document.getElementById('editor');
-        ed.innerHTML = state.notes;
-        ed.oninput = () => { state.notes = ed.innerHTML; save(); };
-
+            .then(r => r.json()).then(d => document.getElementById('heb-date').innerText = d.hebrew);
     </script>
 </body>
 </html>

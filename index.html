@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rotem OS v5.0 | The Growth Masterpiece</title>
+    <title>Rotem OS v5.1 | Growth & Performance</title>
     
     <!-- External Assets -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -13,10 +13,10 @@
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
 
-    <style id="dynamic-theme">
+    <style>
         :root {
             --bg-color: #010409;
-            --card-bg: rgba(13, 17, 23, 0.8);
+            --card-bg: rgba(13, 17, 23, 0.85);
             --accent-color: #c69c6d;
             --text-primary: #f0f6fc;
             --border-color: rgba(255, 255, 255, 0.1);
@@ -30,451 +30,308 @@
             color: var(--text-primary);
             height: 100vh;
             overflow: hidden;
-            transition: background 0.5s ease;
         }
 
-        /* Mica Effect & Glassmorphism */
         .mica {
             background: var(--card-bg);
             backdrop-filter: blur(var(--blur-size)) saturate(180%);
-            -webkit-backdrop-filter: blur(var(--blur-size)) saturate(180%);
             border: 1px solid var(--border-color);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
             border-radius: var(--radius);
         }
 
-        /* Nav Styles */
-        .nav-item {
-            @apply flex items-center gap-4 px-5 py-4 rounded-xl opacity-60 hover:opacity-100 hover:bg-white/5 transition-all cursor-pointer relative overflow-hidden;
-        }
+        /* Navigation */
+        .nav-item { @apply flex items-center gap-4 px-5 py-4 rounded-xl opacity-60 hover:opacity-100 hover:bg-white/5 transition-all cursor-pointer; }
+        .nav-item.active { @apply opacity-100 bg-white/5 text-[var(--accent-color)]; border-r-4 border-[var(--accent-color)]; }
 
-        .nav-item.active {
-            @apply opacity-100 bg-white/5 text-[var(--accent-color)];
-        }
+        /* Views */
+        .view-section { display: none; height: 100%; animation: fadeIn 0.4s ease; }
+        .view-section.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        .nav-item.active::after {
-            content: '';
-            position: absolute;
-            right: 0; top: 25%; height: 50%; width: 4px;
-            background: var(--accent-color);
-            border-radius: 4px;
-        }
-
-        /* View Switching Logic */
-        .view-section { display: none; height: 100%; opacity: 0; transform: translateY(10px); transition: all 0.4s ease; }
-        .view-section.active { display: block; opacity: 1; transform: translateY(0); }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-color); }
-
-        /* Input Styles */
-        input, select {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 8px 12px;
-            color: white;
-            outline: none;
-        }
-        input:focus { border-color: var(--accent-color); }
-
-        /* Day Grid Styling */
+        /* Day Grid */
         .day-node {
             aspect-ratio: 1;
-            @apply mica flex flex-col items-center justify-center cursor-pointer transition-all border border-white/5 relative group;
-            font-size: 0.75rem;
+            @apply mica flex flex-col items-center justify-center cursor-pointer transition-all text-[10px] relative;
         }
-        .day-node:hover { transform: scale(1.05); border-color: var(--accent-color); z-index: 10; }
-        .day-node.completed { background: rgba(198, 156, 109, 0.15); border-color: var(--accent-color); }
+        .day-node.completed { background: rgba(198, 156, 109, 0.2); border-color: var(--accent-color); }
+        .day-node.has-run { border-bottom: 3px solid #3b82f6; }
+        .day-node:hover { transform: scale(1.05); z-index: 10; border-color: white; }
 
-        /* Quill Customization */
-        .ql-editor { font-size: 1.1rem; line-height: 1.8; color: #e6edf3; }
-        .ql-toolbar.ql-snow { border: none !important; border-bottom: 1px solid var(--border-color) !important; background: rgba(255,255,255,0.02); border-radius: var(--radius) var(--radius) 0 0; }
-        .ql-container.ql-snow { border: none !important; }
+        /* Inputs */
+        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); @apply rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent-color)]; }
 
-        @keyframes pulse-accent {
-            0% { box-shadow: 0 0 0 0 rgba(198, 156, 109, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(198, 156, 109, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(198, 156, 109, 0); }
+        /* Modal */
+        #modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            @apply flex items-center justify-center p-10;
         }
-        .active-day-glow { animation: pulse-accent 2s infinite; }
     </style>
 </head>
-<body class="flex overflow-hidden">
+<body class="flex">
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-80 mica m-5 flex flex-col p-8 z-50">
-        <div class="mb-12 flex items-center gap-5">
-            <div class="w-14 h-14 bg-[var(--accent-color)] rounded-2xl flex items-center justify-center text-black font-black text-3xl shadow-2xl">R</div>
-            <div>
-                <h1 class="font-bold text-2xl tracking-tight leading-none">Rotem <span class="text-[var(--accent-color)]">OS</span></h1>
-                <p class="text-[10px] opacity-40 uppercase tracking-[0.3em] mt-2">Personal Identity v5.0</p>
+    <!-- Modal for Spanish History -->
+    <div id="modal-overlay" onclick="closeModal()">
+        <div class="mica w-full max-w-lg p-8 max-h-[80vh] overflow-y-auto" onclick="event.stopPropagation()">
+            <h2 class="text-2xl font-black mb-6 flex justify-between items-center">
+                מילים שלמדתי
+                <button onclick="closeModal()" class="opacity-30 hover:opacity-100"><i data-lucide="x"></i></button>
+            </h2>
+            <div id="words-history-list" class="space-y-3">
+                <!-- Words injected here -->
             </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="w-80 mica m-5 flex flex-col p-8 z-50">
+        <div class="mb-12">
+            <h1 class="font-bold text-2xl tracking-tight">Rotem <span class="text-[var(--accent-color)]">OS</span></h1>
+            <p class="text-[10px] opacity-30 uppercase tracking-[0.3em]">Version 5.1 | Growth</p>
         </div>
 
         <nav class="space-y-3 flex-1">
-            <div onclick="switchView('dash')" id="nav-dash" class="nav-item active"><i data-lucide="layout-grid"></i><span class="font-bold">דאשבורד צמיחה</span></div>
-            <div onclick="switchView('morning')" id="nav-morning" class="nav-item"><i data-lucide="sun"></i><span class="font-bold">סדר בוקר וקודש</span></div>
-            <div onclick="switchView('trading')" id="nav-trading" class="nav-item"><i data-lucide="candlestick-chart"></i><span class="font-bold">Swing Trading</span></div>
-            <div onclick="switchView('notes')" id="nav-notes" class="nav-item"><i data-lucide="file-text"></i><span class="font-bold">OneNote Pro</span></div>
-            <div onclick="switchView('settings')" id="nav-settings" class="nav-item mt-8 opacity-50"><i data-lucide="settings-2"></i><span class="font-bold">הגדרות מערכת</span></div>
+            <div onclick="switchView('dash')" id="nav-dash" class="nav-item active"><i data-lucide="layout-grid"></i><span>דאשבורד</span></div>
+            <div onclick="switchView('morning')" id="nav-morning" class="nav-item"><i data-lucide="book-open"></i><span>סדר בוקר</span></div>
+            <div onclick="switchView('trading')" id="nav-trading" class="nav-item"><i data-lucide="trending-up"></i><span>Trading</span></div>
+            <div onclick="switchView('notes')" id="nav-notes" class="nav-item"><i data-lucide="pen-tool"></i><span>Notes</span></div>
+            <div onclick="switchView('settings')" id="nav-settings" class="nav-item opacity-40"><i data-lucide="settings"></i><span>הגדרות</span></div>
         </nav>
-
-        <!-- Vision Mini-Board -->
-        <div class="mt-auto mica p-4 bg-white/5 space-y-3">
-            <h4 class="text-[10px] font-black uppercase opacity-30 tracking-widest">Vision Board</h4>
-            <div class="flex flex-col gap-2 text-xs">
-                <div class="flex justify-between items-center"><span>Half Marathon</span><i data-lucide="check-circle-2" class="text-green-500 w-3"></i></div>
-                <div class="flex justify-between items-center"><span>Thailand Trip</span><i data-lucide="circle" class="opacity-20 w-3"></i></div>
-                <div class="flex justify-between items-center"><span>Spanish Fluency</span><i data-lucide="circle" class="opacity-20 w-3"></i></div>
-            </div>
-        </div>
     </aside>
 
-    <!-- Main Workspace -->
-    <main class="flex-1 flex flex-col relative overflow-hidden">
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col p-10 overflow-hidden">
         
-        <!-- Global Header -->
-        <header class="h-24 flex items-center justify-between px-12 border-b border-white/5 bg-black/20 backdrop-blur-md">
-            <div class="flex flex-col">
-                <div class="flex items-center gap-3">
-                    <span class="text-[10px] opacity-40 font-bold uppercase tracking-[0.2em]">Current Progress</span>
-                    <span class="bg-[var(--accent-color)]/20 text-[var(--accent-color)] text-[9px] px-2 py-0.5 rounded-full font-bold">LIVE</span>
-                </div>
-                <h2 class="text-3xl font-black italic">יום <span id="current-day-val" class="text-[var(--accent-color)]">--</span> <span class="text-sm opacity-20 font-normal">/ 100</span></h2>
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-10">
+            <div>
+                <h2 class="text-3xl font-black">יום <span id="current-day-num" class="text-[var(--accent-color)]">--</span></h2>
+                <div id="heb-date" class="text-xs opacity-50 font-bold"></div>
             </div>
-
-            <div class="flex items-center gap-8">
-                <div class="text-left">
-                    <div id="heb-date" class="text-sm font-bold text-[var(--accent-color)]">טוען תאריך...</div>
-                    <div id="greg-date" class="text-[10px] opacity-40 font-bold text-right"></div>
-                </div>
-                <div class="h-10 w-px bg-white/10"></div>
-                <div id="clock" class="text-3xl font-black tracking-tighter opacity-90">00:00</div>
-            </div>
+            <div id="clock" class="text-4xl font-black tracking-tighter">00:00</div>
         </header>
 
-        <!-- Dynamic Content Area -->
-        <div class="flex-1 overflow-y-auto p-12 pb-32">
+        <div class="flex-1 overflow-y-auto pb-20">
             
             <!-- VIEW: DASHBOARD -->
             <section id="view-dash" class="view-section active">
-                <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-12">
-                    <div class="lg:col-span-3 mica p-10">
-                        <div class="flex justify-between items-end mb-8">
-                            <h3 class="text-2xl font-black flex items-center gap-3"><i data-lucide="calendar" class="text-[var(--accent-color)]"></i> 100 Days Roadmap</h3>
-                            <div class="flex gap-2">
-                                <div class="flex items-center gap-2 text-[10px] opacity-50"><span class="w-2 h-2 rounded-full bg-[var(--accent-color)]"></span> Completed</div>
-                                <div class="flex items-center gap-2 text-[10px] opacity-50"><span class="w-2 h-2 rounded-full bg-white/10"></span> Pending</div>
-                            </div>
-                        </div>
-                        <div id="main-grid" class="grid grid-cols-10 gap-3">
-                            <!-- JS will generate 100 boxes here -->
-                        </div>
-                    </div>
-
-                    <div class="space-y-8">
-                        <!-- Spanish Card -->
-                        <div class="mica p-6 border-r-4 border-blue-500/50">
-                            <div class="flex justify-between items-start mb-4">
-                                <i data-lucide="languages" class="text-blue-400"></i>
-                                <span class="text-[9px] font-bold opacity-30">SPANISH DAILY</span>
-                            </div>
-                            <div id="spanish-word-box" class="mb-6">
-                                <h4 id="sp-word" class="text-2xl font-black text-white">¡Hola!</h4>
-                                <p id="sp-trans" class="text-sm opacity-50 italic">שלום</p>
-                            </div>
-                            <button onclick="generateWord()" class="w-full py-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-bold rounded-xl transition-all">למד מילה חדשה</button>
-                        </div>
-
-                        <!-- Mini Stats -->
-                        <div class="mica p-6 border-r-4 border-green-500/50">
-                            <i data-lucide="activity" class="text-green-500 mb-4"></i>
-                            <h4 class="font-bold">Next Run: 15km</h4>
-                            <p class="text-xs opacity-40 mt-1">Marathon Training Phase 2</p>
-                            <div class="w-full bg-white/5 h-1.5 rounded-full mt-4 overflow-hidden">
-                                <div class="bg-green-500 h-full w-[65%]"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- VIEW: MORNING (SEFARIA) -->
-            <section id="view-morning" class="view-section h-full">
-                <div class="mica h-full overflow-hidden flex flex-col">
-                    <div class="p-4 bg-white/5 flex justify-between items-center border-b border-white/5">
-                        <span class="text-xs font-bold opacity-50">Sefaria Library Integration</span>
-                        <div class="flex gap-4">
-                            <button class="text-[10px] hover:text-[var(--accent-color)]">תורה</button>
-                            <button class="text-[10px] hover:text-[var(--accent-color)]">תהילים</button>
-                            <button class="text-[10px] hover:text-[var(--accent-color)]">משנה</button>
-                        </div>
-                    </div>
-                    <iframe src="https://www.sefaria.org.il/texts" class="flex-1 w-full filter grayscale invert opacity-90 contrast-125"></iframe>
-                </div>
-            </section>
-
-            <!-- VIEW: TRADING -->
-            <section id="view-trading" class="view-section h-full">
-                <div class="grid grid-cols-1 xl:grid-cols-4 gap-8 h-full">
-                    <div class="xl:col-span-3 mica overflow-hidden relative min-h-[600px]">
-                        <div id="tv_chart_container" class="h-full"></div>
-                    </div>
-                    <div class="mica p-8 flex flex-col gap-6">
-                        <h3 class="text-xl font-bold flex items-center gap-2"><i data-lucide="calculator"></i> Risk Manager</h3>
-                        <div class="space-y-5">
-                            <div class="group">
-                                <label class="text-[10px] opacity-30 block mb-2 uppercase">Entry Price</label>
-                                <input type="number" id="tr-entry" oninput="runTradeCalc()" class="w-full text-xl font-bold" placeholder="0.00">
-                            </div>
-                            <div>
-                                <label class="text-[10px] opacity-30 block mb-2 uppercase">Stop Loss</label>
-                                <input type="number" id="tr-stop" oninput="runTradeCalc()" class="w-full text-xl font-bold text-red-400" placeholder="0.00">
-                            </div>
-                            <div>
-                                <label class="text-[10px] opacity-30 block mb-2 uppercase">Take Profit</label>
-                                <input type="number" id="tr-target" oninput="runTradeCalc()" class="w-full text-xl font-bold text-green-400" placeholder="0.00">
-                            </div>
-                        </div>
-                        
-                        <div class="mt-auto p-6 bg-white/5 rounded-2xl text-center border border-white/5">
-                            <span class="text-[10px] opacity-40 uppercase block mb-1">Reward to Risk Ratio</span>
-                            <div id="rr-display" class="text-5xl font-black text-[var(--accent-color)]">1:0.0</div>
-                            <p id="trade-verdict" class="text-[9px] mt-4 opacity-30 italic">Enter parameters to analyze</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- VIEW: NOTES (ONENOTE) -->
-            <section id="view-notes" class="view-section h-full">
-                <div class="mica h-full flex flex-col overflow-hidden">
-                    <div id="editor-toolbar"></div>
-                    <div id="editor-main" class="flex-1"></div>
-                    <div class="p-3 bg-black/20 text-[9px] opacity-30 flex justify-between items-center px-8">
-                        <span>Word Count: <span id="word-count">0</span></span>
-                        <span id="save-indicator">AUTO-SAVE ENABLED</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- VIEW: SETTINGS -->
-            <section id="view-settings" class="view-section">
-                <div class="max-w-2xl mica p-12 space-y-10">
-                    <h2 class="text-3xl font-black">System Customization</h2>
+                <div class="grid grid-cols-3 gap-6 mb-10">
                     
-                    <div class="grid grid-cols-2 gap-12">
-                        <div class="space-y-6">
-                            <h4 class="text-xs font-bold opacity-40 uppercase tracking-widest">Visuals</h4>
-                            <div class="flex flex-col gap-4">
-                                <label class="text-sm flex justify-between">Accent Color <input type="color" id="set-color" onchange="applySettings()" value="#c69c6d"></label>
-                                <label class="text-sm flex justify-between">Mica Opacity <input type="range" id="set-alpha" min="10" max="100" oninput="applySettings()"></label>
-                                <label class="text-sm flex justify-between">Blur Intensity <input type="range" id="set-blur" min="0" max="80" oninput="applySettings()"></label>
-                            </div>
+                    <!-- Running Card -->
+                    <div class="mica p-6 col-span-1 border-r-4 border-blue-500/50">
+                        <div class="flex justify-between mb-4">
+                            <i data-lucide="run" class="text-blue-400"></i>
+                            <span class="text-[10px] font-bold opacity-30">TRACKER</span>
                         </div>
-                        <div class="space-y-6">
-                            <h4 class="text-xs font-bold opacity-40 uppercase tracking-widest">Data Management</h4>
-                            <div class="flex flex-col gap-3">
-                                <button onclick="exportData()" class="w-full py-3 bg-white/5 hover:bg-white/10 rounded-lg text-xs font-bold">Export JSON Profile</button>
-                                <button onclick="resetOS()" class="w-full py-3 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-xs font-bold">Factory Reset System</button>
-                            </div>
+                        <h3 class="font-bold mb-4">חצי מרתון (21ק"מ)</h3>
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <input type="number" id="run-km" placeholder="קילומטר">
+                            <input type="text" id="run-pace" placeholder="קצב">
+                            <input type="date" id="run-date" class="col-span-2">
+                        </div>
+                        <button onclick="saveRun()" class="w-full py-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 text-xs font-bold rounded-lg transition-all">שמור ריצה</button>
+                    </div>
+
+                    <!-- Spanish Card (Clickable) -->
+                    <div class="mica p-6 cursor-pointer border-r-4 border-purple-500/50 hover:bg-white/5 transition-all" onclick="openWordsHistory()">
+                        <div class="flex justify-between mb-4">
+                            <i data-lucide="languages" class="text-purple-400"></i>
+                            <span class="text-[10px] font-bold opacity-30">CLICK TO VIEW HISTORY</span>
+                        </div>
+                        <div id="current-word-display" class="mb-4">
+                            <h4 id="sp-word" class="text-2xl font-black">¡Hola!</h4>
+                            <p id="sp-heb" class="text-sm opacity-40">שלום</p>
+                        </div>
+                        <button onclick="event.stopPropagation(); learnNewWord()" class="w-full py-2 bg-purple-500/20 text-xs font-bold rounded-lg">מילה חדשה</button>
+                    </div>
+
+                    <!-- Trading Quick View -->
+                    <div class="mica p-6 border-r-4 border-[var(--accent-color)]/50">
+                        <i data-lucide="bar-chart-2" class="text-[var(--accent-color)] mb-4"></i>
+                        <h3 class="font-bold">ניהול סיכונים</h3>
+                        <p class="text-xs opacity-40">זכור: המגמה היא החבר שלך. בדוק RSI שבועי.</p>
+                    </div>
+                </div>
+
+                <div class="mica p-8">
+                    <h3 class="text-xl font-bold mb-6">100 Days Progress</h3>
+                    <div id="roadmap-grid" class="grid grid-cols-10 gap-3"></div>
+                </div>
+            </section>
+
+            <!-- VIEW: TRADING (Reverted Layout) -->
+            <section id="view-trading" class="view-section h-full">
+                <div class="grid grid-cols-3 gap-6 h-full">
+                    <!-- 2/3 Width Chart -->
+                    <div class="col-span-2 mica overflow-hidden relative min-h-[500px]">
+                        <div id="tradingview_widget" class="h-full"></div>
+                    </div>
+                    <!-- 1/3 Width Calculator -->
+                    <div class="mica p-8 space-y-6">
+                        <h3 class="text-xl font-bold">R/R Calculator</h3>
+                        <div class="space-y-4">
+                            <label class="block text-xs opacity-40 uppercase">Entry</label>
+                            <input type="number" id="tr-entry" oninput="calcRR()" class="w-full text-lg font-bold">
+                            <label class="block text-xs opacity-40 uppercase">Stop Loss</label>
+                            <input type="number" id="tr-stop" oninput="calcRR()" class="w-full text-lg font-bold text-red-400">
+                            <label class="block text-xs opacity-40 uppercase">Target</label>
+                            <input type="number" id="tr-target" oninput="calcRR()" class="w-full text-lg font-bold text-green-400">
+                        </div>
+                        <div class="pt-10 text-center border-t border-white/5">
+                            <span class="text-xs opacity-30 block mb-2">Reward to Risk Ratio</span>
+                            <div id="rr-val" class="text-6xl font-black text-[var(--accent-color)]">1:0.0</div>
                         </div>
                     </div>
                 </div>
             </section>
 
-        </div>
+            <!-- Other Views -->
+            <section id="view-morning" class="view-section h-full">
+                <iframe src="https://www.sefaria.org.il/texts" class="w-full h-full mica grayscale invert"></iframe>
+            </section>
 
-        <!-- Float Footer Context -->
-        <div class="absolute bottom-10 right-12 flex gap-4 pointer-events-none">
-            <div class="mica px-4 py-2 text-[10px] font-bold opacity-50 uppercase tracking-widest">Rotem Gen V.</div>
+            <section id="view-notes" class="view-section h-full">
+                <div class="mica h-full overflow-hidden flex flex-col">
+                    <div id="toolbar-container"></div>
+                    <div id="editor-container" class="flex-1"></div>
+                </div>
+            </section>
+
         </div>
     </main>
 
-    <!-- Internal System Logic -->
     <script>
-        // --- 1. Global State & Dictionary ---
-        const SPANISH_DICT = [
+        const SPANISH_POOL = [
             {s:"Disciplina", h:"משמעת"}, {s:"Éxito", h:"הצלחה"}, {s:"Esfuerzo", h:"מאמץ"},
-            {s:"Mañana", h:"בוקר/מחר"}, {s:"Fuerza", h:"כוח"}, {s:"Vida", h:"חיים"},
-            {s:"Mercado", h:"שוק"}, {s:"Acción", h:"פעולה/מניה"}, {s:"Tiempo", h:"זמן"}
+            {s:"Fuerza", h:"כוח"}, {s:"Enfoque", h:"מיקוד"}, {s:"Mercado", h:"שוק"}
         ];
 
-        let OS_STATE = JSON.parse(localStorage.getItem('ROTEM_OS_DATA')) || {
-            theme: { color: '#c69c6d', alpha: 80, blur: 30 },
-            progress: { start_date: "2026-04-30", completed_days: [] },
-            notes: "",
-            last_word: { s: "¡Hola!", h: "שלום" }
+        let state = JSON.parse(localStorage.getItem('rotem_v5_1')) || {
+            start_date: "2026-04-30",
+            completed_days: [],
+            learnedWords: [],
+            runs: {}, // Format: "YYYY-MM-DD": {km, pace}
+            notes: ""
         };
 
-        // --- 2. Core Functions ---
-        function saveState() {
-            localStorage.setItem('ROTEM_OS_DATA', JSON.stringify(OS_STATE));
-        }
+        function save() { localStorage.setItem('rotem_v5_1', JSON.stringify(state)); }
 
-        function switchView(viewId) {
+        function switchView(id) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(`view-${id}`).classList.add('active');
+            document.getElementById(`nav-${id}`).classList.add('active');
+            if(id === 'trading') initTV();
+        }
+
+        // --- Spanish Logic ---
+        function learnNewWord() {
+            const word = SPANISH_POOL[Math.floor(Math.random() * SPANISH_POOL.length)];
+            document.getElementById('sp-word').innerText = word.s;
+            document.getElementById('sp-heb').innerText = word.h;
             
-            const target = document.getElementById(`view-${viewId}`);
-            target.style.display = 'block';
-            setTimeout(() => target.classList.add('active'), 10);
-            document.getElementById(`nav-${viewId}`).classList.add('active');
-
-            if(viewId === 'trading') initTradingView();
+            if(!state.learnedWords.find(w => w.s === word.s)) {
+                state.learnedWords.push(word);
+                save();
+            }
         }
 
-        // --- 3. Trading Logic ---
-        let tvWidget = null;
-        function initTradingView() {
-            if (tvWidget) return;
-            tvWidget = new TradingView.widget({
-                "autosize": true,
-                "symbol": "NASDAQ:TSLA",
-                "interval": "D",
-                "timezone": "Etc/UTC",
-                "theme": "dark",
-                "style": "1",
-                "locale": "en",
-                "toolbar_bg": "#f1f3f6",
-                "enable_publishing": false,
-                "hide_side_toolbar": false,
-                "allow_symbol_change": true,
-                "container_id": "tv_chart_container"
-            });
+        function openWordsHistory() {
+            const list = document.getElementById('words-history-list');
+            list.innerHTML = state.learnedWords.map(w => `
+                <div class="flex justify-between p-4 bg-white/5 rounded-xl border border-white/5">
+                    <span class="font-bold text-purple-400">${w.s}</span>
+                    <span class="opacity-60">${w.h}</span>
+                </div>
+            `).join('') || '<p class="opacity-30 text-center">עוד לא למדת מילים...</p>';
+            document.getElementById('modal-overlay').style.display = 'flex';
         }
 
-        function runTradeCalc() {
+        function closeModal() { document.getElementById('modal-overlay').style.display = 'none'; }
+
+        // --- Running Logic ---
+        function saveRun() {
+            const km = document.getElementById('run-km').value;
+            const pace = document.getElementById('run-pace').value;
+            const date = document.getElementById('run-date').value;
+            if(!km || !date) return alert("מלא ק"מ ותאריך");
+            
+            state.runs[date] = { km, pace };
+            save();
+            initRoadmap();
+            alert("הריצה נשמרה בסנכרון עם הלוח!");
+        }
+
+        // --- Dashboard Grid ---
+        function initRoadmap() {
+            const grid = document.getElementById('roadmap-grid');
+            grid.innerHTML = '';
+            const start = new Date(state.start_date);
+            
+            for(let i=0; i<100; i++) {
+                const current = new Date(start);
+                current.setDate(start.getDate() + i);
+                const dateStr = current.toISOString().split('T')[0];
+                const runData = state.runs[dateStr];
+                
+                const day = document.createElement('div');
+                day.className = `day-node ${state.completed_days.includes(i) ? 'completed' : ''} ${runData ? 'has-run' : ''}`;
+                day.innerHTML = `<span>${i+1}</span>`;
+                
+                day.onclick = () => {
+                    if(runData) {
+                        alert(`ריצה בתאריך ${dateStr}:\nמרחק: ${runData.km} ק"מ\nקצב: ${runData.pace}`);
+                    } else {
+                        if(state.completed_days.includes(i)) {
+                            state.completed_days = state.completed_days.filter(d => d !== i);
+                        } else {
+                            state.completed_days.push(i);
+                        }
+                        save();
+                        initRoadmap();
+                    }
+                };
+                grid.appendChild(day);
+            }
+            
+            const diff = Math.ceil((new Date() - start) / 86400000);
+            document.getElementById('current-day-num').innerText = diff;
+        }
+
+        // --- Trading Logic ---
+        function initTV() {
+            new TradingView.widget({"autosize": true, "symbol": "NASDAQ:TSLA", "interval": "D", "theme": "dark", "container_id": "tradingview_widget"});
+        }
+
+        function calcRR() {
             const entry = parseFloat(document.getElementById('tr-entry').value);
             const stop = parseFloat(document.getElementById('tr-stop').value);
             const target = parseFloat(document.getElementById('tr-target').value);
-            
             if(entry && stop && target) {
-                const risk = Math.abs(entry - stop);
-                const reward = Math.abs(target - entry);
-                const ratio = (reward / risk).toFixed(2);
-                document.getElementById('rr-display').innerText = `1:${ratio}`;
-                
-                const verdict = document.getElementById('trade-verdict');
-                if(ratio >= 2) {
-                    verdict.innerText = "High Quality Setup - R/R Optimized";
-                    verdict.className = "text-[9px] mt-4 text-green-500 font-bold uppercase";
-                } else {
-                    verdict.innerText = "Low R/R Ratio - Check Strategy";
-                    verdict.className = "text-[9px] mt-4 text-red-400 opacity-60 italic";
-                }
+                const r = Math.abs((target - entry) / (entry - stop)).toFixed(1);
+                document.getElementById('rr-val').innerText = `1:${r}`;
             }
         }
 
-        // --- 4. Dashboard & Roadmap Logic ---
-        function initRoadmap() {
-            const grid = document.getElementById('main-grid');
-            grid.innerHTML = '';
-            
-            const startDate = new Date(OS_STATE.progress.start_date);
-            const today = new Date();
-            const currentDayNum = Math.ceil((today - startDate) / (1000 * 60 * 60 * 24));
-            document.getElementById('current-day-val').innerText = currentDayNum;
-
-            for(let i = 1; i <= 100; i++) {
-                const day = document.createElement('div');
-                day.className = `day-node ${OS_STATE.progress.completed_days.includes(i) ? 'completed' : ''}`;
-                if(i === currentDayNum) day.classList.add('active-day-glow');
-                
-                day.innerHTML = `
-                    <span class="opacity-30">${i}</span>
-                    ${OS_STATE.progress.completed_days.includes(i) ? '<i data-lucide="check" class="w-3 text-[var(--accent-color)] mt-1"></i>' : ''}
-                `;
-                
-                day.onclick = () => toggleDay(i);
-                grid.appendChild(day);
-            }
-            lucide.createIcons();
-        }
-
-        function toggleDay(num) {
-            const idx = OS_STATE.progress.completed_days.indexOf(num);
-            if(idx > -1) OS_STATE.progress.completed_days.splice(idx, 1);
-            else OS_STATE.progress.completed_days.push(num);
-            saveState();
-            initRoadmap();
-        }
-
-        // --- 5. Spanish Logic ---
-        function generateWord() {
-            const word = SPANISH_DICT[Math.floor(Math.random() * SPANISH_DICT.length)];
-            OS_STATE.last_word = word;
-            document.getElementById('sp-word').innerText = word.s;
-            document.getElementById('sp-trans').innerText = word.h;
-            saveState();
-        }
-
-        // --- 6. UI & Settings ---
-        function applySettings() {
-            OS_STATE.theme.color = document.getElementById('set-color').value;
-            OS_STATE.theme.alpha = document.getElementById('set-alpha').value;
-            OS_STATE.theme.blur = document.getElementById('set-blur').value;
-            
-            document.documentElement.style.setProperty('--accent-color', OS_STATE.theme.color);
-            document.documentElement.style.setProperty('--card-bg', `rgba(13, 17, 23, ${OS_STATE.theme.alpha/100})`);
-            document.documentElement.style.setProperty('--blur-size', `${OS_STATE.theme.blur}px`);
-            saveState();
-        }
-
-        function updateClock() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
-            document.getElementById('greg-date').innerText = now.toLocaleDateString('en-GB', {day:'numeric', month:'short', year:'numeric'});
-        }
-
-        function fetchHebrewDate() {
-            fetch('https://www.hebcal.com/converter?cfg=json&date=now&g2h=1&he=1')
-                .then(r => r.json())
-                .then(data => {
-                    document.getElementById('heb-date').innerText = data.hebrew;
-                });
-        }
-
-        // --- 7. Initialization ---
+        // Init System
         document.addEventListener('DOMContentLoaded', () => {
-            // Init Quill
-            const quill = new Quill('#editor-main', {
-                modules: { toolbar: true },
-                placeholder: 'תעד את הצמיחה שלך כאן...',
-                theme: 'snow'
-            });
+            setInterval(() => {
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
+            }, 1000);
             
-            quill.on('text-change', () => {
-                OS_STATE.notes = quill.root.innerHTML;
-                document.getElementById('word-count').innerText = quill.getText().trim().length;
-                saveState();
-            });
+            fetch('https://www.hebcal.com/converter?cfg=json&date=now&g2h=1&he=1').then(r=>r.json()).then(d => document.getElementById('heb-date').innerText = d.hebrew);
+            
+            const quill = new Quill('#editor-container', { modules: { toolbar: true }, theme: 'snow' });
+            quill.on('text-change', () => { state.notes = quill.root.innerHTML; save(); });
+            if(state.notes) quill.root.innerHTML = state.notes;
 
-            // Load Saved Data
-            if(OS_STATE.notes) quill.root.innerHTML = OS_STATE.notes;
-            document.getElementById('set-alpha').value = OS_STATE.theme.alpha;
-            document.getElementById('set-blur').value = OS_STATE.theme.blur;
-            document.getElementById('sp-word').innerText = OS_STATE.last_word.s;
-            document.getElementById('sp-trans').innerText = OS_STATE.last_word.h;
-            
-            // Start Systems
-            updateClock();
-            setInterval(updateClock, 60000);
-            fetchHebrewDate();
             initRoadmap();
-            applySettings();
             lucide.createIcons();
         });
-
-        function resetOS() {
-            if(confirm("זה ימחוק את כל הנתונים. האם אתה בטוח?")) {
-                localStorage.removeItem('ROTEM_OS_DATA');
-                location.reload();
-            }
-        }
     </script>
 </body>
 </html>

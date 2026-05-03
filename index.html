@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rotem OS v5.1 | Growth & Performance</title>
+    <title>Rotem OS v6.0 | Master Command Center</title>
     
     <!-- External Assets -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -17,7 +17,7 @@
         :root {
             --bg-color: #010409;
             --card-bg: rgba(13, 17, 23, 0.85);
-            --accent-color: #c69c6d;
+            --accent-color: #c69c6d; /* Gold */
             --text-primary: #f0f6fc;
             --border-color: rgba(255, 255, 255, 0.1);
             --radius: 16px;
@@ -51,14 +51,19 @@
         /* Day Grid */
         .day-node {
             aspect-ratio: 1;
-            @apply mica flex flex-col items-center justify-center cursor-pointer transition-all text-[10px] relative;
+            @apply mica flex flex-col items-center justify-center cursor-pointer transition-all text-[12px] font-bold relative;
         }
-        .day-node.completed { background: rgba(198, 156, 109, 0.2); border-color: var(--accent-color); }
-        .day-node.has-run { border-bottom: 3px solid #3b82f6; }
+        .day-node.completed { background: rgba(198, 156, 109, 0.2); border-color: var(--accent-color); color: var(--accent-color); }
+        .day-node.has-run { border-bottom: 4px solid #3b82f6; }
+        .day-node.today { 
+            border: 2px solid white; 
+            box-shadow: 0 0 15px rgba(255,255,255,0.2); 
+            background: rgba(255,255,255,0.1);
+        }
         .day-node:hover { transform: scale(1.05); z-index: 10; border-color: white; }
 
         /* Inputs */
-        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); @apply rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent-color)]; }
+        input { background: rgba(255,255,255,0.05); border: 1px solid var(--border-color); @apply rounded-lg px-3 py-2 text-sm outline-none focus:border-[var(--accent-color)] text-white; }
 
         /* Modal */
         #modal-overlay {
@@ -91,7 +96,7 @@
     <aside class="w-80 mica m-5 flex flex-col p-8 z-50">
         <div class="mb-12">
             <h1 class="font-bold text-2xl tracking-tight">Rotem <span class="text-[var(--accent-color)]">OS</span></h1>
-            <p class="text-[10px] opacity-30 uppercase tracking-[0.3em]">Version 5.1 | Growth</p>
+            <p class="text-[10px] opacity-30 uppercase tracking-[0.3em]">Version 6.0 | Master</p>
         </div>
 
         <nav class="space-y-3 flex-1">
@@ -110,94 +115,133 @@
         <header class="flex justify-between items-center mb-10">
             <div>
                 <h2 class="text-3xl font-black">יום <span id="current-day-num" class="text-[var(--accent-color)]">--</span></h2>
-                <div id="heb-date" class="text-xs opacity-50 font-bold"></div>
+                <div id="heb-date" class="text-xs opacity-50 font-bold mt-1"></div>
             </div>
-            <div id="clock" class="text-4xl font-black tracking-tighter">00:00</div>
+            <div id="clock" class="text-4xl font-black tracking-tighter text-[var(--accent-color)]">00:00</div>
         </header>
 
-        <div class="flex-1 overflow-y-auto pb-20">
+        <div class="flex-1 overflow-y-auto pb-20 pr-2">
             
             <!-- VIEW: DASHBOARD -->
-            <section id="view-dash" class="view-section active">
-                <div class="grid grid-cols-3 gap-6 mb-10">
+            <section id="view-dash" class="view-section active flex flex-col gap-6">
+                
+                <!-- TOP IDENTITY CARDS -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     
-                    <!-- Running Card -->
-                    <div class="mica p-6 col-span-1 border-r-4 border-blue-500/50">
-                        <div class="flex justify-between mb-4">
-                            <i data-lucide="run" class="text-blue-400"></i>
-                            <span class="text-[10px] font-bold opacity-30">TRACKER</span>
+                    <!-- Identity 1: Running Card -->
+                    <div class="mica p-6 border-r-4 border-blue-500/50 flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between mb-4">
+                                <i data-lucide="activity" class="text-blue-400"></i>
+                                <span class="text-[10px] font-bold opacity-30 uppercase">Runner Tracker</span>
+                            </div>
+                            <h3 class="font-bold mb-4">אימון חצי מרתון (21ק"מ)</h3>
+                            <div class="grid grid-cols-2 gap-2 mb-4">
+                                <input type="number" id="run-km" placeholder="קילומטר (ק&quot;מ)">
+                                <input type="text" id="run-pace" placeholder="קצב (דק'/ק&quot;מ)">
+                                <input type="date" id="run-date" class="col-span-2">
+                            </div>
                         </div>
-                        <h3 class="font-bold mb-4">חצי מרתון (21ק"מ)</h3>
-                        <div class="grid grid-cols-2 gap-2 mb-4">
-                            <input type="number" id="run-km" placeholder="קילומטר">
-                            <input type="text" id="run-pace" placeholder="קצב">
-                            <input type="date" id="run-date" class="col-span-2">
-                        </div>
-                        <button onclick="saveRun()" class="w-full py-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 text-xs font-bold rounded-lg transition-all">שמור ריצה</button>
+                        <button onclick="saveRun()" class="w-full py-2 bg-blue-500/20 hover:bg-blue-500/40 text-blue-200 text-xs font-bold rounded-lg transition-all mt-auto">שמור ריצה וסנכרן</button>
                     </div>
 
-                    <!-- Spanish Card (Clickable) -->
-                    <div class="mica p-6 cursor-pointer border-r-4 border-purple-500/50 hover:bg-white/5 transition-all" onclick="openWordsHistory()">
-                        <div class="flex justify-between mb-4">
-                            <i data-lucide="languages" class="text-purple-400"></i>
-                            <span class="text-[10px] font-bold opacity-30">CLICK TO VIEW HISTORY</span>
+                    <!-- Identity 2: Spanish Card -->
+                    <div class="mica p-6 cursor-pointer border-r-4 border-purple-500/50 hover:bg-white/5 transition-all flex flex-col justify-between" onclick="openWordsHistory()">
+                        <div>
+                            <div class="flex justify-between mb-4">
+                                <i data-lucide="languages" class="text-purple-400"></i>
+                                <span class="text-[10px] font-bold opacity-30 uppercase">Click for History</span>
+                            </div>
+                            <div id="current-word-display" class="mb-4">
+                                <h4 id="sp-word" class="text-3xl font-black text-purple-200">¡Hola!</h4>
+                                <p id="sp-heb" class="text-md opacity-60 mt-1">שלום</p>
+                            </div>
                         </div>
-                        <div id="current-word-display" class="mb-4">
-                            <h4 id="sp-word" class="text-2xl font-black">¡Hola!</h4>
-                            <p id="sp-heb" class="text-sm opacity-40">שלום</p>
-                        </div>
-                        <button onclick="event.stopPropagation(); learnNewWord()" class="w-full py-2 bg-purple-500/20 text-xs font-bold rounded-lg">מילה חדשה</button>
+                        <button onclick="event.stopPropagation(); learnNewWord()" class="w-full py-2 bg-purple-500/20 hover:bg-purple-500/40 text-purple-200 text-xs font-bold rounded-lg transition-all mt-auto">מילה חדשה</button>
                     </div>
 
-                    <!-- Trading Quick View -->
-                    <div class="mica p-6 border-r-4 border-[var(--accent-color)]/50">
-                        <i data-lucide="bar-chart-2" class="text-[var(--accent-color)] mb-4"></i>
-                        <h3 class="font-bold">ניהול סיכונים</h3>
-                        <p class="text-xs opacity-40">זכור: המגמה היא החבר שלך. בדוק RSI שבועי.</p>
+                    <!-- Identity 3: Trading Mindset -->
+                    <div class="mica p-6 border-r-4 border-[var(--accent-color)] flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between mb-4">
+                                <i data-lucide="bar-chart-2" class="text-[var(--accent-color)]"></i>
+                                <span class="text-[10px] font-bold opacity-30 uppercase">NYSE Trader</span>
+                            </div>
+                            <h3 class="font-bold text-lg mb-2">כללי ברזל למסחר</h3>
+                            <ul class="text-xs opacity-70 space-y-2 font-medium list-disc list-inside">
+                                <li>המניה חייבת להיות בטרנד עולה ברור.</li>
+                                <li>שווי שוק מעל 10 מיליארד דולר.</li>
+                                <li>ווליום מספק לכניסה ויציאה חלקה.</li>
+                                <li>בדיקת התאמת RSI בגרף שבועי.</li>
+                            </ul>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-white/10 text-center">
+                            <span class="text-[10px] font-bold text-[var(--accent-color)] uppercase tracking-widest">Discipline = Freedom</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mica p-8">
-                    <h3 class="text-xl font-bold mb-6">100 Days Progress</h3>
+                <!-- BOTTOM MASTER CALENDAR -->
+                <div class="mica p-8 w-full">
+                    <div class="flex justify-between items-end mb-6">
+                        <h3 class="text-xl font-bold text-[var(--accent-color)]">100 Days Master Roadmap</h3>
+                        <span class="text-xs opacity-40">התחיל ב: 30/04/2026</span>
+                    </div>
                     <div id="roadmap-grid" class="grid grid-cols-10 gap-3"></div>
+                    
+                    <!-- Legend -->
+                    <div class="flex gap-6 mt-6 pt-6 border-t border-white/10 text-xs opacity-60">
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded bg-[var(--accent-color)] opacity-20 border border-[var(--accent-color)]"></div> יום הושלם</div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded border-b-4 border-blue-500 bg-white/5"></div> יום עם ריצה</div>
+                        <div class="flex items-center gap-2"><div class="w-3 h-3 rounded border-2 border-white bg-white/10 shadow-[0_0_10px_rgba(255,255,255,0.3)]"></div> היום</div>
+                    </div>
                 </div>
             </section>
 
-            <!-- VIEW: TRADING (Reverted Layout) -->
+            <!-- VIEW: TRADING (2/3 Chart, 1/3 Calc) -->
             <section id="view-trading" class="view-section h-full">
                 <div class="grid grid-cols-3 gap-6 h-full">
                     <!-- 2/3 Width Chart -->
-                    <div class="col-span-2 mica overflow-hidden relative min-h-[500px]">
+                    <div class="col-span-2 mica overflow-hidden relative h-[70vh]">
                         <div id="tradingview_widget" class="h-full"></div>
                     </div>
                     <!-- 1/3 Width Calculator -->
-                    <div class="mica p-8 space-y-6">
-                        <h3 class="text-xl font-bold">R/R Calculator</h3>
-                        <div class="space-y-4">
-                            <label class="block text-xs opacity-40 uppercase">Entry</label>
-                            <input type="number" id="tr-entry" oninput="calcRR()" class="w-full text-lg font-bold">
-                            <label class="block text-xs opacity-40 uppercase">Stop Loss</label>
-                            <input type="number" id="tr-stop" oninput="calcRR()" class="w-full text-lg font-bold text-red-400">
-                            <label class="block text-xs opacity-40 uppercase">Target</label>
-                            <input type="number" id="tr-target" oninput="calcRR()" class="w-full text-lg font-bold text-green-400">
+                    <div class="mica p-8 flex flex-col h-[70vh]">
+                        <h3 class="text-xl font-bold mb-6 text-[var(--accent-color)]">R/R Calculator</h3>
+                        <div class="space-y-6 flex-1">
+                            <div>
+                                <label class="block text-xs opacity-50 uppercase mb-1">Entry Price</label>
+                                <input type="number" id="tr-entry" oninput="calcRR()" class="w-full text-xl font-bold py-3 bg-white/5">
+                            </div>
+                            <div>
+                                <label class="block text-xs opacity-50 uppercase mb-1">Stop Loss</label>
+                                <input type="number" id="tr-stop" oninput="calcRR()" class="w-full text-xl font-bold py-3 text-red-400 bg-white/5 border-red-900/30">
+                            </div>
+                            <div>
+                                <label class="block text-xs opacity-50 uppercase mb-1">Target Price</label>
+                                <input type="number" id="tr-target" oninput="calcRR()" class="w-full text-xl font-bold py-3 text-green-400 bg-white/5 border-green-900/30">
+                            </div>
                         </div>
-                        <div class="pt-10 text-center border-t border-white/5">
-                            <span class="text-xs opacity-30 block mb-2">Reward to Risk Ratio</span>
-                            <div id="rr-val" class="text-6xl font-black text-[var(--accent-color)]">1:0.0</div>
+                        <div class="pt-8 text-center border-t border-white/10 mt-auto">
+                            <span class="text-xs opacity-40 block mb-2 uppercase tracking-widest">Reward / Risk</span>
+                            <div id="rr-val" class="text-6xl font-black text-white">1:<span class="text-[var(--accent-color)]">0.0</span></div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- Other Views -->
+            <!-- VIEW: MORNING (Sefaria) -->
             <section id="view-morning" class="view-section h-full">
-                <iframe src="https://www.sefaria.org.il/texts" class="w-full h-full mica grayscale invert"></iframe>
+                <div class="mica h-full overflow-hidden p-2">
+                    <iframe src="https://www.sefaria.org.il/texts" class="w-full h-full rounded-xl grayscale invert opacity-90"></iframe>
+                </div>
             </section>
 
+            <!-- VIEW: NOTES (Quill.js) -->
             <section id="view-notes" class="view-section h-full">
-                <div class="mica h-full overflow-hidden flex flex-col">
-                    <div id="toolbar-container"></div>
-                    <div id="editor-container" class="flex-1"></div>
+                <div class="mica h-[70vh] overflow-hidden flex flex-col">
+                    <div id="toolbar-container" class="border-b border-white/10 bg-white/5 text-white"></div>
+                    <div id="editor-container" class="flex-1 bg-white/5 text-white p-4"></div>
                 </div>
             </section>
 
@@ -207,10 +251,12 @@
     <script>
         const SPANISH_POOL = [
             {s:"Disciplina", h:"משמעת"}, {s:"Éxito", h:"הצלחה"}, {s:"Esfuerzo", h:"מאמץ"},
-            {s:"Fuerza", h:"כוח"}, {s:"Enfoque", h:"מיקוד"}, {s:"Mercado", h:"שוק"}
+            {s:"Fuerza", h:"כוח"}, {s:"Enfoque", h:"מיקוד"}, {s:"Mercado", h:"שוק"},
+            {s:"Paciencia", h:"סבלנות"}, {s:"Crecimiento", h:"צמיחה"}
         ];
 
-        let state = JSON.parse(localStorage.getItem('rotem_v5_1')) || {
+        // Centralized Master State
+        let state = JSON.parse(localStorage.getItem('ROTEM_MASTER_DATA')) || {
             start_date: "2026-04-30",
             completed_days: [],
             learnedWords: [],
@@ -218,7 +264,7 @@
             notes: ""
         };
 
-        function save() { localStorage.setItem('rotem_v5_1', JSON.stringify(state)); }
+        function save() { localStorage.setItem('ROTEM_MASTER_DATA', JSON.stringify(state)); }
 
         function switchView(id) {
             document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
@@ -243,11 +289,11 @@
         function openWordsHistory() {
             const list = document.getElementById('words-history-list');
             list.innerHTML = state.learnedWords.map(w => `
-                <div class="flex justify-between p-4 bg-white/5 rounded-xl border border-white/5">
-                    <span class="font-bold text-purple-400">${w.s}</span>
-                    <span class="opacity-60">${w.h}</span>
+                <div class="flex justify-between p-4 bg-white/5 rounded-xl border border-white/10 hover:bg-white/10 transition-all">
+                    <span class="font-bold text-purple-300 text-lg">${w.s}</span>
+                    <span class="opacity-70">${w.h}</span>
                 </div>
-            `).join('') || '<p class="opacity-30 text-center">עוד לא למדת מילים...</p>';
+            `).join('') || '<p class="opacity-30 text-center">עוד לא למדת מילים. לחץ על מילה חדשה!</p>';
             document.getElementById('modal-overlay').style.display = 'flex';
         }
 
@@ -258,34 +304,57 @@
             const km = document.getElementById('run-km').value;
             const pace = document.getElementById('run-pace').value;
             const date = document.getElementById('run-date').value;
-            if(!km || !date) return alert("מלא ק"מ ותאריך");
+            if(!km || !date) return alert("אנא הזן קילומטראז' ותאריך");
             
             state.runs[date] = { km, pace };
             save();
-            initRoadmap();
-            alert("הריצה נשמרה בסנכרון עם הלוח!");
+            initRoadmap(); // Refresh calendar to show the new run
+            alert("הריצה נשמרה בהצלחה וסונכרנה עם הלוח המרכזי!");
         }
 
-        // --- Dashboard Grid ---
+        // --- Master Calendar Logic ---
         function initRoadmap() {
             const grid = document.getElementById('roadmap-grid');
             grid.innerHTML = '';
-            const start = new Date(state.start_date);
             
+            const startDate = new Date(state.start_date + "T00:00:00");
+            
+            // Calculate dynamic "Today" index based on real system date
+            const todayDate = new Date();
+            const timeDiff = todayDate.getTime() - startDate.getTime();
+            const currentDayIndex = Math.floor(timeDiff / (1000 * 3600 * 24)); // Days elapsed
+            
+            document.getElementById('current-day-num').innerText = Math.max(1, currentDayIndex + 1);
+
             for(let i=0; i<100; i++) {
-                const current = new Date(start);
-                current.setDate(start.getDate() + i);
-                const dateStr = current.toISOString().split('T')[0];
+                const dayDate = new Date(startDate);
+                dayDate.setDate(startDate.getDate() + i);
+                
+                // Format YYYY-MM-DD for matching
+                const dateStr = dayDate.toLocaleDateString('en-CA'); 
                 const runData = state.runs[dateStr];
                 
                 const day = document.createElement('div');
-                day.className = `day-node ${state.completed_days.includes(i) ? 'completed' : ''} ${runData ? 'has-run' : ''}`;
+                let classes = `day-node`;
+                if (state.completed_days.includes(i)) classes += ` completed`;
+                if (runData) classes += ` has-run`;
+                if (i === currentDayIndex) classes += ` today`; // Highlight today
+                
+                day.className = classes;
                 day.innerHTML = `<span>${i+1}</span>`;
+                
+                // Tooltip info
+                if(runData) {
+                    day.title = `ריצה: ${runData.km} ק"מ בקצב ${runData.pace}\nתאריך: ${dateStr}`;
+                } else {
+                    day.title = `תאריך: ${dateStr}`;
+                }
                 
                 day.onclick = () => {
                     if(runData) {
-                        alert(`ריצה בתאריך ${dateStr}:\nמרחק: ${runData.km} ק"מ\nקצב: ${runData.pace}`);
+                        alert(`נתוני ריצה לתאריך ${dateStr}:\nמרחק: ${runData.km} ק"מ\nקצב: ${runData.pace} דק'/ק"מ`);
                     } else {
+                        // Toggle completion
                         if(state.completed_days.includes(i)) {
                             state.completed_days = state.completed_days.filter(d => d !== i);
                         } else {
@@ -297,14 +366,25 @@
                 };
                 grid.appendChild(day);
             }
-            
-            const diff = Math.ceil((new Date() - start) / 86400000);
-            document.getElementById('current-day-num').innerText = diff;
         }
 
         // --- Trading Logic ---
         function initTV() {
-            new TradingView.widget({"autosize": true, "symbol": "NASDAQ:TSLA", "interval": "D", "theme": "dark", "container_id": "tradingview_widget"});
+            if(document.getElementById('tradingview_widget').innerHTML === "") {
+                new TradingView.widget({
+                    "autosize": true, 
+                    "symbol": "NASDAQ:TSLA", 
+                    "interval": "W", // Default to weekly RSI checks as requested
+                    "timezone": "Etc/UTC",
+                    "theme": "dark", 
+                    "style": "1",
+                    "locale": "he_IL",
+                    "enable_publishing": false,
+                    "backgroundColor": "rgba(13, 17, 23, 0.85)",
+                    "gridColor": "rgba(255, 255, 255, 0.06)",
+                    "container_id": "tradingview_widget"
+                });
+            }
         }
 
         function calcRR() {
@@ -312,22 +392,49 @@
             const stop = parseFloat(document.getElementById('tr-stop').value);
             const target = parseFloat(document.getElementById('tr-target').value);
             if(entry && stop && target) {
-                const r = Math.abs((target - entry) / (entry - stop)).toFixed(1);
-                document.getElementById('rr-val').innerText = `1:${r}`;
+                const risk = Math.abs(entry - stop);
+                const reward = Math.abs(target - entry);
+                if(risk > 0) {
+                    const r = (reward / risk).toFixed(2);
+                    const color = r >= 2 ? "text-green-400" : (r >= 1 ? "text-yellow-400" : "text-red-400");
+                    document.getElementById('rr-val').innerHTML = `1:<span class="${color}">${r}</span>`;
+                }
+            } else {
+                document.getElementById('rr-val').innerHTML = `1:<span class="text-[var(--accent-color)]">0.0</span>`;
             }
         }
 
         // Init System
         document.addEventListener('DOMContentLoaded', () => {
+            // Set current date in the run tracker as default
+            document.getElementById('run-date').value = new Date().toLocaleDateString('en-CA');
+
+            // Clock update
             setInterval(() => {
                 document.getElementById('clock').innerText = new Date().toLocaleTimeString('he-IL', {hour:'2-digit', minute:'2-digit'});
             }, 1000);
             
-            fetch('https://www.hebcal.com/converter?cfg=json&date=now&g2h=1&he=1').then(r=>r.json()).then(d => document.getElementById('heb-date').innerText = d.hebrew);
+            // Hebrew Date (Hebcal API Integration)
+            fetch('https://www.hebcal.com/converter?cfg=json&date=now&g2h=1&he=1')
+                .then(r => r.json())
+                .then(d => {
+                    if(d && d.hebrew) document.getElementById('heb-date').innerText = d.hebrew;
+                }).catch(e => console.error("Hebcal API err:", e));
             
-            const quill = new Quill('#editor-container', { modules: { toolbar: true }, theme: 'snow' });
+            // Quill Editor Init
+            const quill = new Quill('#editor-container', { 
+                modules: { toolbar: [ [{ 'header': [1, 2, 3, false] }], ['bold', 'italic', 'underline', 'strike'], [{ 'list': 'ordered'}, { 'list': 'bullet' }], ['clean'] ] }, 
+                theme: 'snow' 
+            });
             quill.on('text-change', () => { state.notes = quill.root.innerHTML; save(); });
             if(state.notes) quill.root.innerHTML = state.notes;
+
+            // Load initial data
+            if(state.learnedWords.length > 0) {
+                const lastWord = state.learnedWords[state.learnedWords.length - 1];
+                document.getElementById('sp-word').innerText = lastWord.s;
+                document.getElementById('sp-heb').innerText = lastWord.h;
+            }
 
             initRoadmap();
             lucide.createIcons();
